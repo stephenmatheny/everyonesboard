@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\GameController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,17 +11,5 @@ Route::get('/health', function () {
     ]);
 });
 
-Route::get('/games', function () {
-    return response()->json([
-        [
-            'id' => 1,
-            'title' => 'Catan',
-            'players' => '3-4',
-        ],
-        [
-            'id' => 2,
-            'title' => 'Ticket to Ride',
-            'players' => '2-5',
-        ],
-    ]);
-});
+Route::get('/games', [GameController::class, 'index']);
+Route::post('/games', [GameController::class, 'store']);
