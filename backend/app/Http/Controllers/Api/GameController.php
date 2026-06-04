@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\GameResource;
 use App\Models\Game;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,10 +14,11 @@ class GameController extends Controller
     {
         $games = Game::query()
             ->orderBy('title')
-            ->get()
-            ->map(fn (Game $game) => $this->formatGame($game));
+            ->get();
 
-        return response()->json($games);
+        return response()->json(
+            GameResource::collection($games)->resolve()
+        );
     }
 
     public function store(Request $request): JsonResponse
@@ -30,29 +32,9 @@ class GameController extends Controller
 
         $game = Game::create($validated);
 
-        return response()->json($this->formatGame($game), 201);
-    }
-
-    private function formatGame(Game $game): array
-    {
-        return [
-            'id' => $game->id,
-            'title' => $game->title,
-            'players' => $this->formatPlayers($game),
-            'playTimeMinutes' => $game->play_time_minutes,
-        ];
-    }
-
-    private function formatPlayers(Game $game): ?string
-    {
-        if ($game->min_players && $game->max_players) {
-            return "{$game->min_players}-{$game->max_players}";
-        }
-
-        if ($game->min_players) {
-            return "{$game->min_players}+";
-        }
-
-        return null;
+        return response()->json(
+            (new GameResource($game))->resolve(),
+            201
+        );
     }
 }
